@@ -4,6 +4,7 @@
 
 enum class TokenKind {
     None,
+    Error,
     String,
     Number,
     Identifier,
@@ -11,6 +12,8 @@ enum class TokenKind {
     Reserved,
     Spaces,
     Eoln,
+    EndOfFile,
+    Comment,
 };
 
 struct Token {
@@ -18,10 +21,17 @@ struct Token {
     TokenKind kind;
 };
 
+bool skipSpacesAndComments(const Token& token);
+
 struct Scanner {
-    int _pos {};
-    StrView _code {};
+    int _pos{};
+    StrView _code{};
+    Func<bool(Token)> shouldSkipToken = skipSpacesAndComments;
 
     void setCode(StrView code);
-};
 
+    Token peek() const;
+    bool advanceText(const Str& tokenText);
+
+    bool advanceMatch(Func<bool(Token)> matchToken);
+};
