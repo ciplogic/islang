@@ -30,6 +30,15 @@ int matchAll(StrView str, const Func<bool(char)> &tokenMatcher) {
     return length;
 }
 
+int matchAnyOf(StrView str, Vec<Str> &vecValues) {
+    for (Str &candidate: vecValues) {
+        if (str == candidate) {
+            return str.length();
+        }
+    }
+    return 0;
+}
+
 int matchByFilter(StrView str, const Func<bool(char)> &matchFirst, const Func<bool(char)> &matchRest) {
     if (!matchFirst(str[0])) {
         return 0;
