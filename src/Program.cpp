@@ -9,20 +9,24 @@ void scanKtFile(const Str &fileName) {
     Scanner scanner;
     scanner.setCode(fileContent);
     std::cout << "File name: " << fileName << std::endl;
+    std::cout << "Tokens: " << std::endl;
     while (true) {
         auto token = scanner.peek();
         if (token.kind == TokenKind::Error) {
-            std::cout << "Error: " << token.text << std::endl;
+            std::cout << "\nError: " << token.text << std::endl;
             return;
         }
         if (token.kind == TokenKind::Eoln) {
+            scanner.advanceText(token.text);
+            continue;
+        }
+        if (token.kind == TokenKind::EndOfFile) {
             return;
         }
 
-        std::cout << "Token: ('" << token.text <<
+        std::cout << "('" << token.text <<
                 "'," << (int) token.kind
-                << ')'
-                << std::endl;
+                << "),";
         scanner.advanceText(token.text);
     }
 }
@@ -35,6 +39,5 @@ int main() {
         scanKtFile(file);
     }
 
-    std::cout << "Hello World!\n";
     return 0;
 }

@@ -2,8 +2,38 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+
+
+int indexOf(const Str &s, char c) {
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] == c) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+Str strFmt(const Str &fmt, std::initializer_list<Str> args) {
+    Str result = fmt;
+    int pos = 0;
+    Str key;
+    for (const Str &arg: args) {
+        key.clear();
+        key += '$';
+        key += std::to_string(pos);
+        result = result.replace(fmt.find(key), key.length(), arg);
+        pos++;
+    }
+    return result;
+}
+
 
 Vec<Str> io::filesInDir(const Str &path, const Str &extension) {
+    std::filesystem::directory_entry p(path);
+    if (!p.exists()) {
+        return {};
+    }
     Vec<Str> result;
     for (const auto &entry: std::filesystem::directory_iterator(path)) {
         Str fullFileName = entry.path().string();
@@ -45,4 +75,50 @@ Vec<Str> readFileLines(const std::string &filename) {
         lines.push_back(line);
     }
     return lines;
+}
+
+Str utils::strFmt(const Str &fmt, std::initializer_list<Str> args) {
+    Str result = fmt;
+    int pos = 0;
+    Str key;
+    for (const Str &arg: args) {
+        key.clear();
+        key += '$';
+        key += std::to_string(pos);
+        result = result.replace(fmt.find(key), key.length(), arg);
+        pos++;
+    }
+    return result;
+}
+
+
+Str utils::strJoin(const Str &sep, const std::vector<Str> &args) {
+    Str result;
+    bool first = true;
+    for (const auto &arg: args) {
+        if (first) {
+            first = false;
+        }
+        else {
+            result += sep;
+        }
+        result += arg;
+    }
+    return result;
+}
+
+void utils::print(const Str &s) {
+    std::cout<<s;
+}
+
+void utils::printLn(const Str &s) {
+    std::cout<<s<<"\n";
+}
+
+void utils::print(const Str &fmt, std::initializer_list<Str> args) {
+    utils::print(utils::strFmt(fmt, args));
+}
+
+void utils::printLn(const Str &fmt, std::initializer_list<Str> args) {
+    utils::printLn(utils::strFmt(fmt, args));
 }

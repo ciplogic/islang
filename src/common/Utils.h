@@ -31,6 +31,18 @@ void addAll(Vec<T>& dest, Vec<T>& src) {
         dest.push_back(i);
     }
 }
+
+namespace utils {
+    int indexOf(const Str &s, char c);
+    Str strFmt(const Str &fmt, std::initializer_list<Str> args);
+    Str strJoin(const Str &sep, const std::vector<Str> &args);
+
+    void print(const Str &s);
+    void printLn(const Str &s);
+    void print(const Str &fmt, std::initializer_list<Str> args);
+    void printLn(const Str &fmt, std::initializer_list<Str> args);
+}
+
 namespace io {
     Vec<Str> filesInDir(const Str &dirName, const Str &extension);
     Str readAllFile(const Str &fullFileName);

@@ -2,6 +2,8 @@
 
 #include <functional>
 
+#include "ScannerUtils.h"
+
 using TokenMatcherFunc = Func<int(StrView)>;
 
 bool Char_isSpace(char c) {
@@ -32,8 +34,8 @@ int matchAll(StrView str, const Func<bool(char)> &tokenMatcher) {
 
 int matchAnyOf(StrView str, Vec<Str> &vecValues) {
     for (Str &candidate: vecValues) {
-        if (str == candidate) {
-            return str.length();
+        if (str.starts_with(candidate)) {
+            return candidate.length();
         }
     }
     return 0;
@@ -71,6 +73,18 @@ int matchIdentifier(StrView str) {
         });
 }
 
+namespace {
+    Vec<Str> _operators = {".", "<", ">", ";"};
+    Vec<Str> _parens = {"{", "}", "[", "]", "(", ")"};
+}
+
+int matchOperator(StrView str) {
+    return matchAnyOf(str, _operators);
+}
+
+int matchParens(StrView str) {
+    return matchAnyOf(str, _parens);
+}
 
 struct LexerRule {
     TokenKind kind;
@@ -82,6 +96,8 @@ Vec<LexerRule> setLexerRules() {
     result.push_back({TokenKind::Spaces, matchSpaces});
     result.push_back({TokenKind::Eoln, matchEoln});
     result.push_back({TokenKind::Identifier, matchIdentifier});
+    result.push_back({TokenKind::Parens, matchParens});
+    result.push_back({TokenKind::Operator, matchOperator});
     return result;
 }
 
@@ -105,17 +121,10 @@ void Scanner::setCode(StrView code) {
     _pos = 0;
 }
 
-Str extractErrorMessage(StrView remainingText) {
-    if (remainingText.length() > 200) {
-        remainingText = remainingText.substr(0, 200);
-    }
-    return Str(remainingText);
-}
-
 Token Scanner::peek() const {
     StrView str = _code.substr(_pos);
     if (str.empty()) {
-        return Token{extractErrorMessage(str), TokenKind::EndOfFile};
+        return Token{"", TokenKind::EndOfFile};
     }
 
     Vec<LexerRule> &rules = lexerRules;
@@ -129,7 +138,7 @@ Token Scanner::peek() const {
         return token;
     }
 
-    return {extractErrorMessage(str), TokenKind::Error};
+    return {ScannerUtils::getErrorOut(str), TokenKind::Error};
 }
 
 bool Scanner::advanceText(const Str &tokenText) {
@@ -152,7 +161,7 @@ namespace {
     }
 }
 
-bool Scanner::advanceMatch(Func<bool(Token)> matchToken) {
+bool Scanner::advanceMatch(const Func<bool(Token)> &matchToken) {
     skipSpaces(*this);
     auto currentToken = peek();
     bool isMatching = matchToken(currentToken);

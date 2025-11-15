@@ -14,6 +14,7 @@ enum class TokenKind {
     Eoln,
     EndOfFile,
     Comment,
+    Parens,
 };
 
 struct Token {
@@ -33,5 +34,5 @@ struct Scanner {
     Token peek() const;
     bool advanceText(const Str& tokenText);
 
-    bool advanceMatch(Func<bool(Token)> matchToken);
+    bool advanceMatch(const Func<bool(Token)> &matchToken);
 };

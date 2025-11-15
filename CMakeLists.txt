@@ -16,4 +16,6 @@ add_executable(
         src/common/SimLang.h
         src/parse/KtParser.cpp
         src/parse/KtParser.h
+        src/lex/ScannerUtils.cpp
+        src/lex/ScannerUtils.h
 )
