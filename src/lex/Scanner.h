@@ -15,10 +15,12 @@ enum class TokenKind {
     EndOfFile,
     Comment,
     Parens,
+    Annotation,
 };
 
 struct Token {
     Str text;
+    int pos;
     TokenKind kind;
 };
 

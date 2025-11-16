@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "ScannerUtils.h"
+#include "../common/Utils.h"
 
 using TokenMatcherFunc = Func<int(StrView)>;
 
@@ -73,9 +74,24 @@ int matchIdentifier(StrView str) {
         });
 }
 
+int matchAnnotation(StrView str) {
+    if (str[0] != '@') {
+        return 0;
+    }
+
+    StrView remainder = str.substr(1);
+    int lenId = matchIdentifier(remainder);
+    return lenId == 0 ? 0 : 1 + lenId;
+}
+
 namespace {
-    Vec<Str> _operators = {".", "<", ">", ";"};
+    Vec<Str> _operators = {
+        "==", "=", "+", "-", "*", "/", "%",
+        ",", "!", "?", "&&", "||",
+        ".", "<", ">", ";", ":"
+    };
     Vec<Str> _parens = {"{", "}", "[", "]", "(", ")"};
+    Vec<Str> _reservedWords = {"fun", "package"};
 }
 
 int matchOperator(StrView str) {
@@ -84,6 +100,52 @@ int matchOperator(StrView str) {
 
 int matchParens(StrView str) {
     return matchAnyOf(str, _parens);
+}
+
+int matchReserved(StrView str) {
+    int matchLen = matchIdentifier(str);
+    if (!matchLen) {
+        return 0;
+    }
+
+    int matchReserved = matchAnyOf(str, _reservedWords);
+    return matchReserved == matchLen
+               ? matchReserved
+               : 0;
+}
+
+int matchString(StrView str) {
+    char first = str[0];
+    if (first != '"' && first != '\'') {
+        return 0;
+    }
+    for (int i = 1; i < str.length(); i++) {
+        if (str[i] == first) {
+            return i + 1;
+        }
+    }
+
+    return 0;
+}
+
+int matchNumber(StrView str) {
+    return matchAll(str, Char_isDigit);
+}
+
+int matchComment(StrView str) {
+    if (str[0] != '/') return 0;
+    if (str.length() < 2) return 0;
+    if (str[1] != '*' || str[1] != '/') {return 0;}
+    bool isLineComment = str[0] == '/';
+    if (isLineComment) {
+        int eolnPos = utils::indexOf(str, '\n');
+        if (eolnPos == -1) {
+            return str.length();
+        }
+        return eolnPos;
+    }
+    //multi line comments are not yet resolved
+    return 0;
 }
 
 struct LexerRule {
@@ -95,9 +157,15 @@ Vec<LexerRule> setLexerRules() {
     Vec<LexerRule> result;
     result.push_back({TokenKind::Spaces, matchSpaces});
     result.push_back({TokenKind::Eoln, matchEoln});
+    result.push_back({TokenKind::Comment, matchComment});
+
+    result.push_back({TokenKind::String, matchString});
+    result.push_back({TokenKind::Reserved, matchReserved});
+    result.push_back({TokenKind::Annotation, matchAnnotation});
     result.push_back({TokenKind::Identifier, matchIdentifier});
     result.push_back({TokenKind::Parens, matchParens});
     result.push_back({TokenKind::Operator, matchOperator});
+    result.push_back({TokenKind::Number, matchNumber});
     return result;
 }
 
@@ -124,7 +192,7 @@ void Scanner::setCode(StrView code) {
 Token Scanner::peek() const {
     StrView str = _code.substr(_pos);
     if (str.empty()) {
-        return Token{"", TokenKind::EndOfFile};
+        return Token{"", _pos, TokenKind::EndOfFile};
     }
 
     Vec<LexerRule> &rules = lexerRules;
@@ -134,11 +202,11 @@ Token Scanner::peek() const {
             continue;
         }
         Str tokenText{str.substr(0, matchLen)};
-        Token token{tokenText, rule.kind};
+        Token token{tokenText, _pos, rule.kind};
         return token;
     }
 
-    return {ScannerUtils::getErrorOut(str), TokenKind::Error};
+    return {ScannerUtils::getErrorOut(str), _pos, TokenKind::Error};
 }
 
 bool Scanner::advanceText(const Str &tokenText) {

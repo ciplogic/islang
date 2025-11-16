@@ -4,8 +4,16 @@
 #include <fstream>
 #include <iostream>
 
-
 int indexOf(const Str &s, char c) {
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] == c) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int utils::indexOf(StrView s, char c) {
     for (int i = 0; i < s.length(); i++) {
         if (s[i] == c) {
             return i;
@@ -27,7 +35,6 @@ Str strFmt(const Str &fmt, std::initializer_list<Str> args) {
     }
     return result;
 }
-
 
 Vec<Str> io::filesInDir(const Str &path, const Str &extension) {
     std::filesystem::directory_entry p(path);
@@ -77,6 +84,14 @@ Vec<Str> readFileLines(const std::string &filename) {
     return lines;
 }
 
+std::string replaceString(std::string str, const std::string &oldStr, const std::string &newStr) {
+    size_t pos = 0;
+    while ((pos = str.find(oldStr)) != std::string::npos) {
+        str.replace(pos, oldStr.size(), newStr);
+    }
+    return str;
+}
+
 Str utils::strFmt(const Str &fmt, std::initializer_list<Str> args) {
     Str result = fmt;
     int pos = 0;
@@ -85,7 +100,7 @@ Str utils::strFmt(const Str &fmt, std::initializer_list<Str> args) {
         key.clear();
         key += '$';
         key += std::to_string(pos);
-        result = result.replace(fmt.find(key), key.length(), arg);
+        result = replaceString(result, key, arg);
         pos++;
     }
     return result;
@@ -98,8 +113,7 @@ Str utils::strJoin(const Str &sep, const std::vector<Str> &args) {
     for (const auto &arg: args) {
         if (first) {
             first = false;
-        }
-        else {
+        } else {
             result += sep;
         }
         result += arg;
@@ -108,11 +122,11 @@ Str utils::strJoin(const Str &sep, const std::vector<Str> &args) {
 }
 
 void utils::print(const Str &s) {
-    std::cout<<s;
+    std::cout << s;
 }
 
 void utils::printLn(const Str &s) {
-    std::cout<<s<<"\n";
+    std::cout << s << "\n";
 }
 
 void utils::print(const Str &fmt, std::initializer_list<Str> args) {

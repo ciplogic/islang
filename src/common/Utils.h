@@ -34,6 +34,7 @@ void addAll(Vec<T>& dest, Vec<T>& src) {
 
 namespace utils {
     int indexOf(const Str &s, char c);
+    int indexOf(StrView s, char c);
     Str strFmt(const Str &fmt, std::initializer_list<Str> args);
     Str strJoin(const Str &sep, const std::vector<Str> &args);
 

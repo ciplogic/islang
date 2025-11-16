@@ -4,16 +4,18 @@
 #include "common/Utils.h"
 #include "lex/Scanner.h"
 
+using namespace utils;
+
 void scanKtFile(const Str &fileName) {
     Str fileContent = io::readAllFile(fileName);
     Scanner scanner;
     scanner.setCode(fileContent);
-    std::cout << "File name: " << fileName << std::endl;
-    std::cout << "Tokens: " << std::endl;
+    printLn(fileName);
+    printLn("Tokens:");
     while (true) {
         auto token = scanner.peek();
         if (token.kind == TokenKind::Error) {
-            std::cout << "\nError: " << token.text << std::endl;
+            printLn("\nError: '$0'", {token.text});
             return;
         }
         if (token.kind == TokenKind::Eoln) {
@@ -24,9 +26,7 @@ void scanKtFile(const Str &fileName) {
             return;
         }
 
-        std::cout << "('" << token.text <<
-                "'," << (int) token.kind
-                << "),";
+        print("$0 ", {token.text});
         scanner.advanceText(token.text);
     }
 }
