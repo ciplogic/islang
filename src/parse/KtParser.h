@@ -1,4 +1,5 @@
 #pragma once
+#include "../common/TResult.h"
 #include "../lex/Scanner.h"
 
 enum class AstNodeType {
@@ -12,6 +13,5 @@ struct KtAstNode {
     Vec<KtAstNode> children;
 };
 
-struct KtParser {
-    Scanner scanner{};
-};
+TResult<KtAstNode> parse(Scanner &scanner);
+TResult<KtAstNode> parseCode(const Str &code);

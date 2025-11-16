@@ -18,4 +18,7 @@ add_executable(
         src/parse/KtParser.h
         src/lex/ScannerUtils.cpp
         src/lex/ScannerUtils.h
+        src/common/TResult.h
+        src/common/VecLinq.h
+        src/common/VecLinq.cpp
 )

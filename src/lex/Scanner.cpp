@@ -135,7 +135,7 @@ int matchNumber(StrView str) {
 int matchComment(StrView str) {
     if (str[0] != '/') return 0;
     if (str.length() < 2) return 0;
-    if (str[1] != '*' || str[1] != '/') {return 0;}
+    if (str[1] != '*' || str[1] != '/') { return 0; }
     bool isLineComment = str[0] == '/';
     if (isLineComment) {
         int eolnPos = utils::indexOf(str, '\n');
@@ -211,6 +211,31 @@ Token Scanner::peek() const {
 
 bool Scanner::advanceText(const Str &tokenText) {
     return advanceMatch([&](const Token &tk) { return tk.text == tokenText; });
+}
+
+TResult<Vec<Token>> Scanner::getTokensUpToEoln(bool shouldSkip) {
+    Vec<Token> result;
+    do {
+        Token token = peek();
+        advanceText(token.text);
+
+        TokenKind tokenKind = token.kind;
+        bool isEndToken =  (tokenKind == TokenKind::Eoln
+            ||tokenKind == TokenKind::EndOfFile
+            || tokenKind == TokenKind::Error);
+        if (isEndToken) {
+            if (tokenKind== TokenKind::Error) {
+                return {{}, token.text};
+            }
+            break;
+        }
+        bool shouldAddToken = (!shouldSkip || !shouldSkipToken(token));
+        if (shouldAddToken) {
+            result.push_back(token);
+        }
+
+    } while (true);
+    return ok(result);
 }
 
 namespace {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/SimLang.h"
+#include "../common/TResult.h"
 
 enum class TokenKind {
     None,
@@ -33,8 +34,10 @@ struct Scanner {
 
     void setCode(StrView code);
 
-    Token peek() const;
+    [[nodiscard]] Token peek() const;
     bool advanceText(const Str& tokenText);
+
+    TResult<Vec<Token>> getTokensUpToEoln(bool shouldSkip = true);
 
     bool advanceMatch(const Func<bool(Token)> &matchToken);
 };

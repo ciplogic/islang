@@ -3,11 +3,14 @@
 #include "common/SimLang.h"
 #include "common/Utils.h"
 #include "lex/Scanner.h"
+#include "parse/KtParser.h"
 
 using namespace utils;
 
 void scanKtFile(const Str &fileName) {
     Str fileContent = io::readAllFile(fileName);
+
+    TResult<KtAstNode> tree = parseCode(fileContent);
     Scanner scanner;
     scanner.setCode(fileContent);
     printLn(fileName);
