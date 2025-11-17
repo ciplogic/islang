@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "common/SimLang.h"
 #include "common/Utils.h"
 #include "lex/Scanner.h"
