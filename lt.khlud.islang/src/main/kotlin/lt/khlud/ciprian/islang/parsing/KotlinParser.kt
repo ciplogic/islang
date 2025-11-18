@@ -5,9 +5,11 @@ import lt.khlud.ciprian.islang.common.Res.ok
 import lt.khlud.ciprian.islang.common.TResult
 import lt.khlud.ciprian.islang.common.joinTexts
 import lt.khlud.ciprian.islang.lexing.Scanner
+import lt.khlud.ciprian.islang.lexing.skipEmptyLines
 
 fun parseKotlinFile(fileName: String, scanner: Scanner): TResult<KotlinFileDeclarations> {
     val result = KotlinFileDeclarations()
+    scanner.skipEmptyLines()
     var isPackage = scanner.advance("package");
     var rowTokens = scanner.getTokensUpToEoln()
     if (!rowTokens.hasValue()){

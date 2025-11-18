@@ -9,15 +9,15 @@ object LexerObject {
 
     private fun buildRules(): List<LexerRule> {
         val result = ArrayList<LexerRule>()
-        result.add(LexerRule(TokenKind.Spaces, { matchSpaces(it) }))
-        result.add(LexerRule(TokenKind.EndOfLine, { matchEoln(it) }))
-        result.add(LexerRule(TokenKind.Reserved, { matchReservedWords(it) }))
-
-        result.add(LexerRule(TokenKind.Id, { matchIdentifier(it) }))
-        result.add(LexerRule(TokenKind.Str, { matchString(it) }))
-        result.add(LexerRule(TokenKind.Ops, { matchOp(it) }))
-        result.add(LexerRule(TokenKind.Number, { matchNumber(it) }))
-        result.add(LexerRule(TokenKind.Paren, {  matchParen(it) }))
+        result.add(LexerRule(TokenKind.Spaces) { matchSpaces(it) })
+        result.add(LexerRule(TokenKind.EndOfLine) { matchEoln(it) })
+        result.add(LexerRule(TokenKind.Reserved) { matchReservedWords(it) })
+        result.add(LexerRule(TokenKind.Comment) { matchComment(it) })
+        result.add(LexerRule(TokenKind.Id) { matchIdentifier(it) })
+        result.add(LexerRule(TokenKind.Str) { matchString(it) })
+        result.add(LexerRule(TokenKind.Ops) { matchOp(it) })
+        result.add(LexerRule(TokenKind.Number) { matchNumber(it) })
+        result.add(LexerRule(TokenKind.Paren) { matchParen(it) })
         return result
     }
 }
@@ -42,8 +42,8 @@ fun matchExactOne(text: StringView, word: String): Boolean {
     if (text.length < word.length) {
         return false
     }
-    for (i in 1..<word.length){
-        if (text[i]!=word[i]){
+    for (i in 1..<word.length) {
+        if (text[i] != word[i]) {
             return false
         }
     }

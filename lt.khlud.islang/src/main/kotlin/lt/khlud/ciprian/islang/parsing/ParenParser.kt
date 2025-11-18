@@ -21,7 +21,7 @@ fun isCloseParen(operator: String): Boolean {
 fun getRowTokens(scanner: Scanner): TResult<List<Token>> {
     var result = arrayListOf<Token>()
     while (true) {
-        var token = scanner.advance()
+        var token = scanner.skipToken()
         if (!token.hasValue()) {
             return Res.error(token.errorMessage!!)
         }

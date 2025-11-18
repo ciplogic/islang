@@ -13,7 +13,7 @@ class Scanner(var text: StringView) {
     var pos = 0
     var shouldSkipToken: (token: Token) -> Boolean = { skipSpacesAndComments(it) }
 
-    fun advance(): TResult<Token> {
+    fun skipToken(): TResult<Token> {
         var result = peek()
         if (result.hasValue()) {
             text = text.slice(result.value!!.text.length)
@@ -23,10 +23,10 @@ class Scanner(var text: StringView) {
     }
 
     fun advance(expected: String): Boolean {
-        var result = peek()
+        var result = skipToken()
 
         while (result.hasValue() && shouldSkipToken(result.value!!)) {
-            advance()
+            skipToken()
             result = peek();
         }
 
@@ -73,14 +73,14 @@ class Scanner(var text: StringView) {
             if (!token.hasValue()) {
                 return token.error()
             }
-            advance()
+            skipToken()
             val tokenKind: TokenKind? = token.value!!.tokenKind
             val isEndToken: Boolean =
                 (tokenKind === TokenKind.EndOfLine || tokenKind === TokenKind.EndOfFile)
             if (isEndToken) {
                 return ok(result)
             } else {
-                result.add(token.value!!)
+                result.add(token.value)
             }
 
         } while (true)
@@ -95,5 +95,25 @@ private fun skipSpacesAndComments(token: Token): Boolean {
     return when (token.tokenKind) {
         TokenKind.Spaces, TokenKind.Comment -> true
         else -> false
+    }
+}
+
+fun Scanner.skipEmptyLines(): TResult<Boolean> {
+    while (true) {
+        var current = this.peek()
+        if (!current.hasValue()) {
+            return ok(false)
+        }
+        if (skipSpacesAndComments(current.value!!)) {
+            this.skipToken()
+            continue
+        }
+        if (current.value!!.tokenKind == TokenKind.EndOfLine) {
+            skipToken()
+            continue
+        }
+
+        return ok(true)
+
     }
 }

@@ -17,6 +17,7 @@ val operators = arrayListOf<String>(
     "!=",
     ":", ";", "="
 )
+
 fun matchOp(text: StringView): Int {
     return matchExactAny(text, operators)
 }
@@ -76,13 +77,13 @@ val reservedWords = arrayListOf<String>(
     "yield",
 )
 
-fun matchReservedWords(text: StringView) : Int {
+fun matchReservedWords(text: StringView): Int {
     val matchLen = matchIdentifier(text)
-    if (matchLen==0){
+    if (matchLen == 0) {
         return 0
     }
     val matchReservedLen = matchExactAny(text, reservedWords)
-    if (matchReservedLen != matchLen){
+    if (matchReservedLen != matchLen) {
         return 0
     }
     return matchReservedLen
@@ -98,20 +99,51 @@ fun matchString(text: StringView): Int {
     }
     var isEscaped = false;
     for (i in 1..<text.length) {
-        if (isEscaped){
+        if (isEscaped) {
             isEscaped = false
             continue
         }
-        if (text[i] == '\\'){
+        if (text[i] == '\\') {
             isEscaped = true;
             continue
         }
-        if (text[i] == firstCh){
-            return i+1;
+        if (text[i] == firstCh) {
+            return i + 1;
         }
     }
 
     return 0
+}
+
+fun matchComment(text: StringView): Int {
+    if (text[0] != '/' || text.length < 2) {
+        return 0
+    }
+
+    var commentStyle = text[1]
+    if (commentStyle != '/' && commentStyle != '*') {
+        return 0
+    }
+    val isMultiLine = commentStyle == '*'
+    if (isMultiLine) {
+        for (i in 2..<text.length - 1) {
+            var curr = text[i]
+            if (curr != '*') {
+                if (text[i + 1] == '/') {
+                    return i + 2
+                }
+            }
+        }
+        return 0
+    }
+    for (i in 2..<text.length) {
+        val subSlice = text.slice(i)
+        if (matchEoln(subSlice) > 0) {
+            return i
+        }
+    }
+
+    return text.length
 }
 
 fun matchNumber(text: StringView): Int = matchLenAll(text, { isNumeric(it) })
