@@ -1,4 +1,9 @@
-package lt.khlud.ciprian
+package lt.khlud.ciprian.islang
+
+import lt.khlud.ciprian.islang.common.FileUtils
+import lt.khlud.ciprian.islang.common.toView
+import lt.khlud.ciprian.islang.lexing.Scanner
+import lt.khlud.ciprian.islang.parsing.parseKotlinFile
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -13,4 +18,19 @@ fun main() {
         // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
         println("i = $i")
     }
+    val filesInDir = FileUtils.filesInDirectory(".", ".kt")
+
+    for (fileName in filesInDir) {
+        var mainContent = FileUtils.readAllText(fileName)
+        parseFile(fileName, mainContent)
+    }
+
+    return
+
+}
+
+
+private fun parseFile(fileName: String, mainContent: String) {
+    var scanner = Scanner(mainContent.toView())
+    var parsedFile = parseKotlinFile(fileName, scanner)
 }
