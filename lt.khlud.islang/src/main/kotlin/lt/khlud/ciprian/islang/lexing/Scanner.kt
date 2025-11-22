@@ -30,7 +30,7 @@ class Scanner(var text: StringView) {
             result = peek();
         }
 
-        if (!result.hasValue()) {
+        if (result.isError()) {
             return false
         }
         var isMatching = result.value!!.text == expected
@@ -70,23 +70,37 @@ class Scanner(var text: StringView) {
         val result = arrayListOf<Token>()
         do {
             val token = peek()
-            if (!token.hasValue()) {
-                return token.error()
-            }
+            if (token.isError()) return token.error()
             skipToken()
             val tokenKind: TokenKind? = token.value!!.tokenKind
             val isEndToken: Boolean =
                 (tokenKind === TokenKind.EndOfLine || tokenKind === TokenKind.EndOfFile)
             if (isEndToken) {
                 return ok(result)
-            } else {
-                result.add(token.value)
             }
-
+            if (shouldSkip && shouldSkipToken(token.value)) {
+                continue
+            }
+            result.add(token.value)
         } while (true)
     }
 
+    fun isEof(): ScannerEofMode {
+        var token = peek()
+        if (token.isError()) {
+            return ScannerEofMode.IsError
+        }
+
+        if (token.value!!.tokenKind == TokenKind.EndOfFile) {
+            return ScannerEofMode.IsEof
+        }
+        return ScannerEofMode.HasMoreTokens
+    }
+
     override fun toString(): String {
+        if (pos >= text.length) {
+            return ""
+        }
         return text.slice(pos).toString()
     }
 }
@@ -100,20 +114,19 @@ private fun skipSpacesAndComments(token: Token): Boolean {
 
 fun Scanner.skipEmptyLines(): TResult<Boolean> {
     while (true) {
-        var current = this.peek()
-        if (!current.hasValue()) {
-            return ok(false)
-        }
+        val current = this.peek()
+        if (current.isError()) return ok(false)
+
         if (skipSpacesAndComments(current.value!!)) {
             this.skipToken()
             continue
         }
-        if (current.value!!.tokenKind == TokenKind.EndOfLine) {
+        if (current.value.tokenKind == TokenKind.EndOfLine) {
             skipToken()
             continue
         }
 
         return ok(true)
-
     }
 }
+

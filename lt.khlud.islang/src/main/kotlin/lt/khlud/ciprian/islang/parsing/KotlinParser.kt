@@ -12,9 +12,8 @@ fun parseKotlinFile(fileName: String, scanner: Scanner): TResult<KotlinFileDecla
     scanner.skipEmptyLines()
     var isPackage = scanner.advance("package");
     var rowTokens = scanner.getTokensUpToEoln()
-    if (!rowTokens.hasValue()){
-        return rowTokens.error()
-    }
+    if (rowTokens.isError()) return rowTokens.error()
+
     var packageName = rowTokens.value!!.map { it.text }.joinTexts("")
     result.packageName = packageName
 
@@ -23,7 +22,7 @@ fun parseKotlinFile(fileName: String, scanner: Scanner): TResult<KotlinFileDecla
 }
 
 class KotlinFileDeclarations {
-    var packageName: String = ""
+    var packageName = ""
     val imports = arrayListOf<String>()
 
 

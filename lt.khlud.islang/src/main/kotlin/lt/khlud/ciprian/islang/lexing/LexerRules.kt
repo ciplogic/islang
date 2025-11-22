@@ -3,7 +3,8 @@ package lt.khlud.ciprian.islang.lexing
 import lt.khlud.ciprian.islang.common.StringView
 
 
-fun matchSpaces(text: StringView): Int = matchLenAll(text, { it == ' ' || it == '\t' })
+fun matchSpaces(text: StringView): Int =
+    matchLenAll(text, { it == ' ' || it == '\t' })
 fun matchEoln(text: StringView): Int = matchLenAll(text, { it == '\n' || it == '\r' })
 
 val operators = arrayListOf<String>(
